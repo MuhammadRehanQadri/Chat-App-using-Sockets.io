@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Socket.io Example</title>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+</head>
+
+<body>
+<div class="container">
+    <div class="row screen-1">
+        <div class="col-md-6">
+            <input type="text" id="username" placeholder="Enter your name"/>
+            <button id="join-btn">Join</button>
+        </div>
+    </div>
+
+    <div class="row screen-2">
+        <h1>Our Socket.io Chat Application</h1>
+        <div class="col-md-3">
+            <h2>Online Users</h2>
+        </div>
+        <div class="col-md-3">
+            <div>
+                <h2>Messages</h2>
+                <ul id="ul"></ul>
+            </div>
+            <form action="">
+                <input type="text" id="message-textbox"/>
+                <button id="send-btn">Send</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script defer type="text/javascript">
+    $(function () {
+        const socket = io.connect();
+        socket.on('connection', function (socket) {
+            console.log(`Client: connection established`);
+            alert(`Client: connection established`);
+            // socket.on('message', function(msg){
+            //     console.log((`message received ${msg}`));
+            //     alert(`message received ${msg}`);
+            // });
+        });
+
+        socket.on('message', function (message) {
+            console.log(`Client: msg received ${JSON.stringify(message)}`);
+            const { msg } = message;
+            addMessage(msg);
+        });
+
+        socket.on('onConnect', function (message) {
+            console.log(`Client111: msg received ${JSON.stringify(message)}`);
+            const { msg } = message;
+            addMessage(msg);
+        });
+
+
+        let screen1 = $(".screen-1");
+        let screen2 = $(".screen-2");
+        let usernameTextBox = $('#username');
+        let messageTextBox = $('#message-textbox');
+        let joinButton = $("#join-btn");
+        let sendButton = $("#send-btn");
+        let ul = $("#ul");
+        screen2.hide();
+
+        joinButton.on("click", function(e){
+            e.preventDefault();
+            let username = usernameTextBox.val();
+            if (username){
+                socket.emit('onJoin', { username: username });
+                screen1.hide();
+                screen2.show();
+            }
+        });
+
+        sendButton.on("click", function(e){
+            e.preventDefault();
+            socket.emit('message', { msg: usernameTextBox.val()+': ' +  messageTextBox.val() });
+        });
+
+        function addMessage(msg){
+            ul.append('<li>'+msg+'</li>');
+        }
+
+    });
+
+
+
+    // socket.on('user connected', function(user){
+    //     console.log(`user connected ${user}`);
+    //     alert(`user connected ${user}`);
+    // });
+</script>
+</body>
+</html>
